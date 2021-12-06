@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .margin-bottom-xl { margin-bottom: 1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="jumbotron" style="text-align: center;">
+            <h1>Examen THYP du 6 décembre 2021</h1>
+            <p>LAHBIB Abdallah</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h3 id="title" style="text-align: center;">Liste des items de la collection 2</h3>
+            </div>
+            <div id="items-col-2" class="row">
+                
+            </div>
+         
+        </div>
+    </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
+
+    getData = (url) => {
+      return $.ajax({
+        type: 'GET',
+        url : url,
+        crossDomain: true
+       });  
+    }
+
+    showItems = (data) => {
+        card = d3.select('#items-col-2').selectAll(".row").data(data).enter()
+            .append('div').attr('class', 'col-sm-4 mb-12 margin-bottom-xl')
+            .append("div").attr('class', 'card');
+                               
+            card.append('img')
+                .attr('id', el => `img-${el["o:id"]}`)
+                .attr('class', 'card-header')
+                .attr('src', el => {
+                    getData(el["o:media"][0]["@id"]).then((res) => {
+                        d3.select(`#img-${el["o:id"]}`).attr("src", res["o:source"]);
+                    })
+                });
+            card.append('div').attr('class', 'card-body')
+                .append('label')
+                   .attr('class', 'text-success text-center')
+                   .text(el =>  `l'identifiant : ${el["o:id"]}`)
+                .append('label')
+                   .attr('class', 'text-dark text-left text-justify')
+                   .text(el => `Le titre :${el["o:title"]}`)
+            ;
+    }
+
+    $(document).ready( function () {
+        const url_items2 = "https://polemika.univ-paris8.fr/omk/api/items?item_set_id=2";
+        getData(url_items2).then((data) => {  
+            try {
+                showItems(data);
+            } catch (error) {
+                console.log(error);
+            }
+        })
+    })
+</script>
+</html>
