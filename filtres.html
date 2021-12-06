@@ -24,7 +24,7 @@
                 <h3 id="title" style="text-align: center;">Liste de tout les items</h3>
             </div>
             <div class="col-md-6">
-                <select class="custom-select" id="selectSubjects" onchange="showFiltreItems()">
+                <select class="custom-select" id="subjects">
                     <option value=""></option>
                 </select>
             </div>
@@ -62,17 +62,17 @@
                 subjects.forEach( el => {
                     options += `<option value="${el}">${el}</option>`
                 })
-                $('#selectSubjects').html(options);
+                $('#subjects').html(options);
             } catch (error) {
                 console.log(error);
             }
         })     
     }
     showFiltreItems = () => {
-      if ($('#selectSubjects').val() !== "All") {
-        $('#title').html(`liste des items de ${$('#selectSubjects').val()}`)
+      if ($('#subjects').val() !== "All") {
+        $('#title').html(`liste des items de ${$('#subjects').val()}`)
         let items = dataItems.filter(function (el) {
-          return el["dcterms:subject"][0]["@value"] == $('#selectSubjects').val();
+          return el["dcterms:subject"][0]["@value"] == $('#subjects').val();
         });
         showItems(items);
         return;
@@ -104,7 +104,8 @@
                    .text(el => `Le titre :${el["o:title"]}`)
             ;
     }
-    const url_items2 = "https://polemika.univ-paris8.fr/omk/api/items?item_set_id=2";
+    $(document).ready( function () {
+       const url_items2 = "https://polemika.univ-paris8.fr/omk/api/items?item_set_id=2";
         getData(url_items2).then((data) => {  
             try {
                 showItems(data)
@@ -113,5 +114,10 @@
                 console.log(error);
             }
         })
+        
+        $('#subjects').on('change', function() {
+            showFiltreItems()
+        });
+    });
 </script>
 </html>
