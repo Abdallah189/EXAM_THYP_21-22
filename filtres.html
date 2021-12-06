@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Examen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <script src="https://use.fontawesome.com/2ddc4a0f9c.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .margin-bottom-xl { margin-bottom: 1em; }
+  </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="jumbotron" style="text-align: center;">
+            <h1>Examen THYP du 6 décembre 2021</h1>
+            <p>LAHBIB Abdallah</p>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h3 id="title" style="text-align: center;">Liste de tout les items</h3>
+            </div>
+            <div class="col-md-6">
+                <select class="custom-select" id="selectSubjects" onchange="showFiltreItems()">
+                    <option value=""></option>
+                </select>
+            </div>
+           
+            <div id="items-col-2" class="row">
+                
+            </div>
+         
+        </div>
+    </div>
+  </div>
+  </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
+    let dataItems = [];
+    getData = (url) => {
+      return $.ajax({
+        type: 'GET',
+        url : url,
+        crossDomain: true
+       });  
+    }
+
+    showSujets = (url) => {
+      let subjects = [];
+      getData(url).then((data) => {  
+            try {
+                dataItems = data
+                subjects = data.map(value => value["dcterms:subject"][0]["@value"]);
+                subjects = new Set(subjects);
+                options = `<option value="All">Tout</option>`
+                subjects.forEach( el => {
+                    options += `<option value="${el}">${el}</option>`
+                })
+                $('#selectSubjects').html(options);
+            } catch (error) {
+                console.log(error);
+            }
+        })     
+    }
+    showFiltreItems = () => {
+      if ($('#selectSubjects').val() !== "All") {
+        $('#title').html(`liste des items de ${$('#selectSubjects').val()}`)
+        let items = dataItems.filter(function (el) {
+          return el["dcterms:subject"][0]["@value"] == $('#selectSubjects').val();
+        });
+        showItems(items);
+        return;
+      } 
+      $('#title').html(`liste de tout les items`)
+      showItems(dataItems);
+    }
+
+    showItems = (data) => {
+        $('#items-col-2').html('')
+        card = d3.select('#items-col-2').selectAll(".row").data(data).enter()
+            .append('div').attr('class', 'col-sm-4 mb-12 margin-bottom-xl')
+            .append("div").attr('class', 'card');
+                               
+            card.append('img')
+                .attr('id', el => `img-${el["o:id"]}`)
+                .attr('class', 'card-header')
+                .attr('src', el => {
+                    getData(el["o:media"][0]["@id"]).then((res) => {
+                        d3.select(`#img-${el["o:id"]}`).attr("src", res["o:source"]);
+                    })
+                });
+            card.append('div').attr('class', 'card-body')
+                .append('label')
+                   .attr('class', 'text-success text-center')
+                   .text(el =>  `l'identifiant : ${el["o:id"]}`)
+                .append('label')
+                   .attr('class', 'text-dark text-left text-justify')
+                   .text(el => `Le titre :${el["o:title"]}`)
+            ;
+    }
+    const url_items2 = "https://polemika.univ-paris8.fr/omk/api/items?item_set_id=2";
+        getData(url_items2).then((data) => {  
+            try {
+                showItems(data)
+                showSujets(url_items2);
+            } catch (error) {
+                console.log(error);
+            }
+        })
+</script>
+</html>
